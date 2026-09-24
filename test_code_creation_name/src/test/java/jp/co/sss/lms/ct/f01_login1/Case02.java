@@ -1,6 +1,7 @@
 package jp.co.sss.lms.ct.f01_login1;
 
 import static jp.co.sss.lms.ct.util.WebDriverUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Duration;
 
@@ -41,9 +42,13 @@ public class Case02 {
 	@Order(1)
 	@DisplayName("テスト01 トップページURLでアクセス")
 	void test01() {
-		// TODO ここに追加
+		// トップページのURLにアクセスする
 		goTo("http://localhost:8080/lms");
 
+		// タイトルの判定処理
+		assertEquals("ログイン | LMS", webDriver.getTitle());
+
+		// エビデンスを取得
 		getEvidence(new Object() {
 		});
 	}
@@ -52,18 +57,24 @@ public class Case02 {
 	@Order(2)
 	@DisplayName("テスト02 DBに登録されていないユーザーでログイン")
 	void test02() {
-		// TODO ここに追加
+		// (DBに存在しない)ID, パスワードを入力
 		webDriver.findElement(By.id("loginId")).clear();
 		webDriver.findElement(By.id("loginId")).sendKeys("0000");
 		webDriver.findElement(By.id("password")).clear();
 		webDriver.findElement(By.id("password")).sendKeys("0000");
 
+		// ログインボタンをクリック
 		webDriver.findElement(By.cssSelector(".btn.btn-primary")).click();
 
+		// 「ログインに失敗しました。」が含まれるエラーメッセージが表示されるまで待つ
 		final WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(60));
 		wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("span.help-inline.error"),
 				"ログインに失敗しました。"));
 
+		// エラーメッセージの判定処理
+		assertEquals("* ログインに失敗しました。", webDriver.findElement(By.cssSelector("span.help-inline.error")).getText());
+
+		// エビデンスを取得
 		getEvidence(new Object() {
 		});
 	}

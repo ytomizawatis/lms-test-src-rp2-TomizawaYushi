@@ -1,6 +1,9 @@
 package jp.co.sss.lms.ct.f01_login1;
 
 import static jp.co.sss.lms.ct.util.WebDriverUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.Duration;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -9,11 +12,15 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * 結合テスト ログイン機能①
  * ケース03
  * @author holy
+ * @author 冨澤 雄志
  */
 @TestMethodOrder(OrderAnnotation.class)
 @DisplayName("ケース03 受講生 ログイン 正常系")
@@ -35,14 +42,41 @@ public class Case03 {
 	@Order(1)
 	@DisplayName("テスト01 トップページURLでアクセス")
 	void test01() {
-		// TODO ここに追加
+		// トップページのURLにアクセスする
+		goTo("http://localhost:8080/lms");
+
+		// タイトルの判定処理
+		assertEquals("ログイン | LMS", webDriver.getTitle());
+
+		// エビデンスを取得
+		getEvidence(new Object() {
+		});
 	}
 
 	@Test
 	@Order(2)
 	@DisplayName("テスト02 初回ログイン済みの受講生ユーザーでログイン")
 	void test02() {
-		// TODO ここに追加
+		// (初回ログイン済み受講生ユーザーの)ID, パスワードを入力
+		webDriver.findElement(By.id("loginId")).clear();
+		webDriver.findElement(By.id("loginId")).sendKeys("StudentAA01");
+		webDriver.findElement(By.id("password")).clear();
+		webDriver.findElement(By.id("password")).sendKeys("StudentAA00");
+
+		// ログインボタンをクリック
+		webDriver.findElement(By.cssSelector(".btn.btn-primary")).click();
+
+		// コース詳細画面が表示されるまで待つ
+		final WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(60));
+		wait.until(ExpectedConditions.textToBePresentInElementLocated(
+				By.cssSelector("li.active"), "コース詳細"));
+
+		// タイトルの判定処理
+		assertEquals("コース詳細 | LMS", webDriver.getTitle());
+
+		// エビデンスを取得
+		getEvidence(new Object() {
+		});
 	}
 
 }
