@@ -4,6 +4,8 @@ import static jp.co.sss.lms.ct.util.WebDriverUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,7 +15,9 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
@@ -126,14 +130,47 @@ public class Case05 {
 	@Order(5)
 	@DisplayName("テスト05 キーワード検索で該当キーワードを含む検索結果だけ表示")
 	void test05() {
+		// 表示件数を全件に変更
+		Select select = new Select(webDriver.findElement(By.cssSelector(".form-control.input-sm")));
+		select.selectByVisibleText("ALL");
+
+		// 質問と本文を取得(検索前)
+		List<WebElement> allQuestions = webDriver.findElements(By.cssSelector("[id^='question-h']"));
+		List<String> allQuestionTexts = new ArrayList<>();
+
+		for (WebElement question : allQuestions) {
+			allQuestionTexts.add(question.findElement(By.tagName("dt")).getText());
+		}
+
 		// 検索キーワード("？")を入力
 		webDriver.findElement(By.id("form")).clear();
 		webDriver.findElement(By.id("form")).sendKeys("？");
 
 		// 「検索」ボタンをクリック
-		webDriver.findElement(By.cssSelector("input [type='submit'] [value='検索']")).click();
+		webDriver.findElement(By.cssSelector("input[type='submit'][value='検索']")).click();
 
-		// ~の判定処理
+		// 質問と本文を取得(検索後)
+		List<WebElement> searchedQuestions = webDriver.findElements(By.cssSelector("[id^='question-h']"));
+		List<String> searchedQuestionTexts = new ArrayList<>();
+
+		for (WebElement question : searchedQuestions) {
+			searchedQuestionTexts.add(question.findElement(By.tagName("dt")).getText());
+		}
+
+		// 「？」を含む質問がすべて検索結果に存在するかの判定処理
+		for (String question : allQuestionTexts) {
+			if (question.contains("？")) {
+				assertTrue(searchedQuestionTexts.contains(question));
+			}
+		}
+
+		// 「？」を含まない質問が検索結果に存在しないかの判定処理
+		for (String question : searchedQuestionTexts) {
+			assertTrue(question.contains("？"));
+		}
+
+		// 検索結果へ移動
+		scrollTo(String.valueOf(webDriver.findElement(By.className("sorting_asc")).getLocation().getY()));
 
 		// エビデンスを取得
 		getEvidence(new Object() {
@@ -144,7 +181,15 @@ public class Case05 {
 	@Order(6)
 	@DisplayName("テスト06 「クリア」ボタン押下で入力したキーワードを消去")
 	void test06() {
-		// TODO ここに追加
+		// 「クリア」ボタンをクリック
+		webDriver.findElement(By.cssSelector("input[type='button'][value='クリア']")).click();
+
+		// 入力値の判定処理
+		assertEquals("", webDriver.findElement(By.id("form")).getText());
+
+		// エビデンスを取得
+		getEvidence(new Object() {
+		});
 	}
 
 }
